@@ -1,0 +1,113 @@
+git checkout -b——创建、切换分支 
+
+git branch name 创建
+git checkout name 切换
+git checkout - 切换至上一个分支
+
+git log --graph 以图标形式查看分支
+git reflog 查看当前仓库的操作日志
+
+ git remote add origin git@github.com:github-book/git-tutorial.git
+添加远程仓库
+
+git restore --worktree README.md	表示撤销 README.md 文件工作区的的修改	参数等同于 -W
+git restore --staged README.md	表示撤销暂存区的修改，将文件状态恢复到未 add 之前	参数等同于 -S
+git restore -s HEAD~1 README.md	表示将当前工作区切换到上个 commit 版本	
+git restore -s dbv213 README.md	表示将当前工作区切换到指定 commit id 的版本
+
+git add --all 会记录删除操作
+git add .  不会记录删除操作 将所有修改的文件提交到暂存区
+
+git checkout --file 将文件切换至最近一次状态
+注意这个恢复只能恢复到上一次提交的状态，
+如你刚提交了这个文件到仓库，随后你修改了它，那么使用这个命令只会回到刚刚提交后的那个状态里，不能回到你还没有提交，但修改的状态中。
+该功能不能重复迭代回滚。
+
+查看单个文件可回滚版本：git log filename
+git reset 1a1e91bf37add6c3914ebf20428efc0a7cea33f3 filename 完成回滚
+
+git reflog可以查看当前版本库的提交历史，凡是对仓库版本进行迭代的都会出现在这个里面，包括你回滚版本都会出现在这个历史中
+git reflog命令可以查看所有分支的所有操作记录信息（包括已经被删除的 commit 记录和 reset 的操作）
+
+git log命令可以显示当前分支所有提交过的版本信息，不包括已经被删除的 commit 记录和reset的操作。
+
+Workspace：开发者工作区，也就是你当前写代码的目录，它一般保持的是最新仓库代码。
+Index / Stage：暂存区/缓存区
+Repository：仓库区（或本地仓库）
+Remote：远程仓库
+
+git reset 重置缓存区操作
+
+
+
+git删除本地分支：git branch -D
+git branch -D 分支名
+
+git删除远程分支：git push origin --delete
+注意这里的远程分支名不需要加origin，输入分支名就可以了
+
+git push origin --delete 远程分支名
+
+
+------------------------------------------------------------------------------------------- github使用
+ ssh-keygen -t rsa -C "1902516446@example.com"  本地创建一个ssh的key，因为github是使用ssh服务进行通讯的
+.ssh是隐藏文件，可以使用ls -ah看到，使用cd ~进入用户主目录，然后cd进入到.ssh目录中可以看到文件
+id_rsa是私匙，id_rsa.pub是公匙，id_rsa不能告诉任何人，只有公钥可以，ssh采用的是非对称加密。
+
+接着在github上添加你的公钥，提交公钥后我们不需要登录，因为github上的ssh列表里有这台机器
+
+
+我们本地有一个仓库，我们想把它推送到远程上去，很简单，我们只需要使用git remote add origin命令就可以了，
+origin是github上的仓库名称，意思是远程仓库的意思
+
+git remote add origin git@github.com:beiszhihao/test.git
+git push -u origin master
+push：将本地仓库与远程仓库合并
+
+-u：将本地仓库分支与远程仓库分支一起合并，就是说将master的分支也提交上去，
+这样你就可以在远程仓库上看到你在本地仓库的master中创建了多少分支，
+不加这个参数只将当前的master与远程的合并，没有分支的历史记录，也不能切换分支
+origin：远程仓库的意思，如果这个仓库是远程的那么必须使用这个选项
+
+当我们远程有仓库时，想要关联到本地只需要使用git clone就可以了
+我们可以使用git clone -b分支名 仓库地址来指定分支
+
+我们可以使用git stash命令来保存当前工作状态
+保存工作状态之后可以使用git stash list查看当前存储了多少工作状态
+
+-----------------------------------------------------------------------------------------------
+
+一般情况下，我们在修改代码时，突然来了一个新的需求，
+让我们先去做这个需求，但是此时我们正在写的代码还没有完成，是不可以提交的，
+所以我们先使用git stash保存当前工作状态，在拉取一个分支去这个分支里面干活，干完活之后回到之前的分支，在将工作内容恢复出来继续干活
+
+git stash pop会将list保存的列表也给删除掉
+
+git stash apply 不会删除列表里的内容会默认恢复第一个
+
+如果想恢复指定内容可以使用git stash apply list名称
+
+git stash drop list名称可以移除指定list
+
+git stash clear 移除所有lsit
+
+git stash show 查看栈中最新保存的stash和当前目录的差异。
+
+注意stash是以栈的方式保存的，先进后出。
+准确来说，这个命令的作用就是为了解决git不提交代码不能切换分支的问题。
+
+
+有的时候我们从别的仓库拉取分支下来，是有bug的分支，但是master修复了，我们分支仓库没有修复，
+但是我们难不成重复master操作去修改这个bug？不不太繁琐了，我们直接使用cherry-pick命令将改动copy到我们分支上就可以了，
+这个命令只会将master改动代码合并到我们分支上，不会修改我们的代码
+
+使用git cherry-pick 分支名即可合并分支修改，在此之前要保证你仓库代码是提交的，才可以进行这个步骤。
+
+1.拉取分支，分支名简明摘要说要干什么，然后干活，在合并到master，合并之后在删除分支，这是基本步骤，
+不需要留额外分支，分支只是为了将来看代码时方便而已，能看到这个分支是干什么的。
+
+git restore命令是用来撤销提交与修改的，如：
+git restore file
+使用这条命令会将文件从暂存区删除
+
+
